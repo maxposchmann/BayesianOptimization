@@ -251,8 +251,17 @@ class BayesianOptimization(Observable):
         """
         self._prime_subscriptions()
         self.dispatch(Events.OPTIMIZATION_START)
-        self._prime_queue(init_points)
+        self._prime_queue(1)
+        # self._prime_queue(init_points)
         self.set_gp_params(**gp_params)
+
+        n_iter += init_points - 1
+
+        stdutil = UtilityFunction(kind='std',
+                                  kappa=kappa,
+                                  xi=xi,
+                                  kappa_decay=kappa_decay,
+                                  kappa_decay_delay=kappa_decay_delay)
 
         util = UtilityFunction(kind=acq,
                                kappa=kappa,
@@ -264,8 +273,18 @@ class BayesianOptimization(Observable):
             try:
                 x_probe = next(self._queue)
             except StopIteration:
-                util.update_params()
-                x_probe = self.suggest(util)
+                # if abs(self._space.target.max()) > 10:
+                #     self._prime_queue(init_points)
+                #     x_probe = next(self._queue)
+                #     iteration += init_points
+                # else:
+                # util.kappa = abs(self._space.target.max())
+                if iteration < init_points:
+                    stdutil.update_params()
+                    x_probe = self.suggest(stdutil)
+                else:
+                    util.update_params()
+                    x_probe = self.suggest(util)
                 iteration += 1
 
             self.probe(x_probe, lazy=False)
