@@ -54,10 +54,10 @@ def acq_max(ac, gp, y_max, bounds, random_state, n_warmup=10000, n_iter=10, y_ma
     # Add the best candidate from the random sampling to the seeds so that the
     # optimization algorithm can try to walk up to that particular local maxima
     x_seeds[0] = x_max
-    if not y_max_params is None:
+    # if not y_max_params is None:
         # Add the provided best sample to the seeds so that the optimization
         # algorithm is aware of it and will attempt to find its local maxima
-        x_seeds[1] = y_max_params
+        # x_seeds[1] = y_max_params
 
     for x_try in x_seeds:
         # Find the minimum of minus the acquisition function
