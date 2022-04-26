@@ -83,10 +83,10 @@ class UtilityFunction(object):
         self._kappa_decay_delay = kappa_decay_delay
 
         self.xi = xi
-        
+
         self._iters_counter = 0
 
-        if kind not in ['ucb', 'ei', 'poi']:
+        if kind not in ['ucb', 'ei', 'poi', 'std']:
             err = "The utility function " \
                   "{} has not been implemented, " \
                   "please choose one of ucb, ei, or poi.".format(kind)
@@ -107,6 +107,8 @@ class UtilityFunction(object):
             return self._ei(x, gp, y_max, self.xi)
         if self.kind == 'poi':
             return self._poi(x, gp, y_max, self.xi)
+        if self.kind == 'std':
+            return self._std(x, gp)
 
     @staticmethod
     def _ucb(x, gp, kappa):
@@ -121,7 +123,7 @@ class UtilityFunction(object):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             mean, std = gp.predict(x, return_std=True)
-  
+
         a = (mean - y_max - xi)
         z = a / std
         return a * norm.cdf(z) + std * norm.pdf(z)
@@ -132,8 +134,18 @@ class UtilityFunction(object):
             warnings.simplefilter("ignore")
             mean, std = gp.predict(x, return_std=True)
 
-        z = (mean - y_max - xi)/std
-        return norm.cdf(z)
+        z  = (mean - y_max - xi)/std
+        z0 = (mean - xi)/std
+        return norm.cdf(z) - norm.cdf(z0)
+
+    @staticmethod
+    def _std(x, gp):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            mean, std = gp.predict(x, return_std=True)
+
+        print(std)
+        return std
 
 
 def load_logs(optimizer, logs):
