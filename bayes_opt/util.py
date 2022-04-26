@@ -58,7 +58,7 @@ def acq_max(ac, gp, y_max, bounds, random_state, n_warmup=10000, n_iter=10, y_ma
         # Add the provided best sample to the seeds so that the optimization
         # algorithm is aware of it and will attempt to find its local maxima
         x_seeds[1] = y_max_params
-    
+
     for x_try in x_seeds:
         # Find the minimum of minus the acquisition function
         res = minimize(lambda x: -ac(x.reshape(1, -1), gp=gp, y_max=y_max),
@@ -153,7 +153,6 @@ class UtilityFunction(object):
             warnings.simplefilter("ignore")
             mean, std = gp.predict(x, return_std=True)
 
-        print(std)
         return std
 
 
