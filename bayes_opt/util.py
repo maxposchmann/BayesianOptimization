@@ -85,11 +85,12 @@ class UtilityFunction(object):
     An object to compute the acquisition functions.
     """
 
-    def __init__(self, kind, kappa, xi, kappa_decay=1, kappa_decay_delay=0):
+    def __init__(self, kind, kappa, xi, kappa_decay=1, kappa_decay_delay=0, y_limit = None):
 
         self.kappa = kappa
         self._kappa_decay = kappa_decay
         self._kappa_decay_delay = kappa_decay_delay
+        self.y_limit = y_limit
 
         self.xi = xi
 
@@ -115,7 +116,7 @@ class UtilityFunction(object):
         if self.kind == 'ei':
             return self._ei(x, gp, y_max, self.xi)
         if self.kind == 'poi':
-            return self._poi(x, gp, y_max, self.xi)
+            return self._poi(x, gp, y_max, self.xi, self.y_limit)
         if self.kind == 'std':
             return self._std(x, gp)
 
@@ -138,13 +139,16 @@ class UtilityFunction(object):
         return a * norm.cdf(z) + std * norm.pdf(z)
 
     @staticmethod
-    def _poi(x, gp, y_max, xi):
+    def _poi(x, gp, y_max, xi, y_limit):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             mean, std = gp.predict(x, return_std=True)
 
         z  = (mean - y_max - xi)/std
-        z0 = (mean - xi)/std
+        if not y_limit is None:
+            z0 = (mean - y_limit - xi)/std
+        else:
+            z0 = 0
         return norm.cdf(z) - norm.cdf(z0)
 
     @staticmethod

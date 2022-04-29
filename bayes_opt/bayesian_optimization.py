@@ -213,6 +213,7 @@ class BayesianOptimization(Observable):
                  kappa_decay=1,
                  kappa_decay_delay=0,
                  xi=0.0,
+                 y_limit=None,
                  **gp_params):
         """
         Probes the target space to find the parameters that yield the maximum
@@ -268,7 +269,8 @@ class BayesianOptimization(Observable):
                                kappa=kappa,
                                xi=xi,
                                kappa_decay=kappa_decay,
-                               kappa_decay_delay=kappa_decay_delay)
+                               kappa_decay_delay=kappa_decay_delay,
+                               y_limit=y_limit)
         iteration = 0
         while not self._queue.empty or iteration < n_iter:
             try:
