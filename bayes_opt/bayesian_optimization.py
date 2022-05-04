@@ -214,6 +214,7 @@ class BayesianOptimization(Observable):
                  kappa_decay_delay=0,
                  xi=0.0,
                  y_limit=None,
+                 tol=0,
                  **gp_params):
         """
         Probes the target space to find the parameters that yield the maximum
@@ -291,6 +292,9 @@ class BayesianOptimization(Observable):
                 iteration += 1
 
             self.probe(x_probe, lazy=False)
+            # print(self.max["target"])
+            if self.max["target"] > tol:
+                break
 
             if self._bounds_transformer:
                 self.set_bounds(
