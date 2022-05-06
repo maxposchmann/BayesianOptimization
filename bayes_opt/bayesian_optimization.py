@@ -273,6 +273,7 @@ class BayesianOptimization(Observable):
                                kappa_decay_delay=kappa_decay_delay,
                                y_limit=y_limit)
         self.iteration = 0
+        best = -1e100
         while not self._queue.empty or self.iteration < n_iter:
             try:
                 x_probe = next(self._queue)
@@ -292,6 +293,13 @@ class BayesianOptimization(Observable):
                 self.iteration += 1
 
             self.probe(x_probe, lazy=False)
+            # Check for stagnation
+            if self.max["target"] > best:
+                best = self.max["target"]
+                bestIt = self.iteration
+            if self.iteration - bestIt > 50:
+                break
+            # Compare to tolerance if specified
             if tol:
                 if self.max["target"] > tol:
                     break
