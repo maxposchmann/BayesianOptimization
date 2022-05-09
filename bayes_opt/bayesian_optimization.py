@@ -215,6 +215,9 @@ class BayesianOptimization(Observable):
                  xi=0.0,
                  y_limit=None,
                  tol=None,
+                 stagnationIterations=None,
+                 stagnationThreshold=0.02,
+                 bestValue=None,
                  **gp_params):
         """
         Probes the target space to find the parameters that yield the maximum
@@ -273,32 +276,25 @@ class BayesianOptimization(Observable):
                                kappa_decay_delay=kappa_decay_delay,
                                y_limit=y_limit)
         self.iteration = 0
-        best = -1e100
+        bestIt = 0
+        if not bestValue:
+            bestValue = -1e100
         while not self._queue.empty or self.iteration < n_iter:
             try:
                 x_probe = next(self._queue)
             except StopIteration:
-                # if abs(self._space.target.max()) > 10:
-                #     self._prime_queue(init_points)
-                #     x_probe = next(self._queue)
-                #     iteration += init_points
-                # else:
-                # util.kappa = abs(self._space.target.max())
-                # if iteration < init_points:
-                #     stdutil.update_params()
-                #     x_probe = self.suggest(stdutil)
-                # else:
                 util.update_params()
                 x_probe = self.suggest(util)
                 self.iteration += 1
 
             self.probe(x_probe, lazy=False)
             # Check for stagnation
-            if self.max["target"] > best:
-                best = self.max["target"]
-                bestIt = self.iteration
-            if self.iteration - bestIt > 50:
-                break
+            if stagnationIterations:
+                if self.max["target"] > (bestValue + abs(bestValue)*stagnationThreshold):
+                    bestValue = self.max["target"]
+                    bestIt = self.iteration
+                if self.iteration - bestIt >= stagnationIterations:
+                    break
             # Compare to tolerance if specified
             if tol:
                 if self.max["target"] > tol:
